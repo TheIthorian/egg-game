@@ -6,7 +6,7 @@ export function unicodeToBase64(inputString: string): string {
     return base64String;
 }
 
-export function Base64ToUnicode(base64String: string): string {
+export function base64ToUnicode(base64String: string): string {
     const utf8Bytes = atob(base64String);
     const decodedString = decodeURIComponent(
         utf8Bytes
@@ -29,13 +29,11 @@ export function hexToBase64(hexString: string) {
 }
 
 export function base64ToHex(base64String: string): string {
-    const binaryString = atob(base64String);
-    const hexString = binaryToHex(binaryString);
-    return hexString;
-}
-
-function binaryToHex(binaryString: string): string {
-    return binaryString.replace(/[^\x20-\x7E]/g, '').replace(/(\d{8})/g, function (match) {
-        return ('0' + parseInt(match, 2).toString(16)).slice(-2);
-    });
+    const raw = atob(base64String);
+    let result = '';
+    for (let i = 0; i < raw.length; i++) {
+        const hex = raw.charCodeAt(i).toString(16);
+        result += hex.length === 2 ? hex : '0' + hex;
+    }
+    return result.toUpperCase();
 }
