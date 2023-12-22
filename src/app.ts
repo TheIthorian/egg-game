@@ -1,14 +1,19 @@
 import { DataEncryptor } from './encryption/types';
 import { SimpleEncryptor } from './encryption';
-import { Base64ToUnicode, unicodeToBase64, hexToBase64 } from './util';
-
-const ENCRYPTION_KEY = 'ba2904ceafcec6ef1b65fa6d43e0022eb00156fe';
+import { UrlDatabase } from './url-database';
+import { UrlManager } from './url-manager';
+import { config } from './config';
+import { base64ToUnicode, unicodeToBase64, hexToBase64 } from './util';
 
 export class App {
     private errorElement: HTMLDivElement;
     private textInput: HTMLDivElement;
 
-    constructor(private readonly root: HTMLElement, private readonly dataEncryptor: DataEncryptor) {
+    constructor(
+        private readonly root: HTMLElement,
+        private readonly dataEncryptor: DataEncryptor,
+        private database: UrlDatabase
+    ) {
         this.makeErrorContainer();
         this.makeTextInputs();
     }
@@ -23,9 +28,9 @@ export class App {
         this.textInput = document.createElement('div');
         this.textInput.innerHTML = `
         <label for='input'>Text</label>
-        <input id='input' name='input' value='{"name": "Mr Person ✓"}' />
+        <input id='input' name='input' value='{ "key1": "value1", "key2": "value2" }' />
         <label for='password'>Password</label>
-        <input id='password' name='input' value='123' />
+        <input id='password' name='input' value='password' />
 
         <div id='output-input'></div>
         <div id='output-base64'></div>
@@ -35,35 +40,54 @@ export class App {
         <br>
         <div id='output-decrypted'></div>
         <div id='output-decrypted-base64-decoded'></div>
+        <br>
+        <div id='output-database-value'></div>
         `;
 
-        this.textInput.addEventListener('change', () => this.handleInputChange());
+        this.textInput.addEventListener('change', () =>
+            this.handleInputChange().catch(error => this.handleError(error))
+        );
         this.root.appendChild(this.textInput);
-        this.handleInputChange();
+        this.handleInputChange().catch(error => this.handleError(error));
     }
 
     private async handleInputChange() {
         const input = this.textInput.querySelector<HTMLInputElement>('#input').value;
         const password = this.textInput.querySelector<HTMLInputElement>('#password').value;
 
-        const encrypted = await this.dataEncryptor.encrypt(unicodeToBase64(input), password);
-
-        this.textInput.querySelector<HTMLDivElement>('#output-input').innerText = 'Input: ' + input;
-        this.textInput.querySelector<HTMLDivElement>('#output-base64').innerText =
-            'Input (Base64): ' + unicodeToBase64(input);
-
-        this.textInput.querySelector<HTMLDivElement>('#output-encrypted').innerText = 'Encrypted: ' + encrypted;
-        this.textInput.querySelector<HTMLDivElement>('#output-encrypted-base64').innerText =
-            'Encrypted (Base64): ' + hexToBase64(encrypted);
-
+        const jsonInput = JSON.parse(input);
+        const jsonStringInput = JSON.stringify(jsonInput);
+        const encrypted = await this.dataEncryptor.encrypt(unicodeToBase64(jsonStringInput), password);
         const decrypted = await this.dataEncryptor.decrypt(encrypted, password);
-        this.textInput.querySelector<HTMLDivElement>('#output-decrypted').innerText = 'Decrypted: ' + decrypted;
-        this.textInput.querySelector<HTMLDivElement>('#output-decrypted-base64-decoded').innerText =
-            'Decrypted: ' + Base64ToUnicode(decrypted);
+
+        this.setTextForElement('#output-input', 'Input: ' + jsonStringInput);
+        this.setTextForElement('#output-base64', 'Input (Base64): ' + unicodeToBase64(jsonStringInput));
+
+        this.setTextForElement('#output-encrypted', 'Encrypted: ' + encrypted);
+        this.setTextForElement('#output-encrypted-base64', 'Encrypted (Base64): ' + hexToBase64(encrypted));
+
+        this.setTextForElement('#output-decrypted', 'Decrypted (Base64): ' + decrypted);
+        this.setTextForElement(
+            '#output-decrypted-base64-decoded',
+            'Decrypted (original): ' + base64ToUnicode(decrypted)
+        );
+
+        this.database.setPassword(password);
+        await this.database.setAll(JSON.parse(input));
+
+        this.setTextForElement(
+            '#output-database-value',
+            'Database json string: ' + JSON.stringify(await this.database.getDatabaseJsonString())
+        );
+    }
+
+    private setTextForElement(id: string, value: string) {
+        this.textInput.querySelector<HTMLDivElement>(id).innerText = value;
     }
 
     public static newInstance(root: HTMLElement) {
-        return new App(root, new SimpleEncryptor(ENCRYPTION_KEY));
+        const encryptor = new SimpleEncryptor(config.encryptionKey);
+        return new App(root, encryptor, new UrlDatabase(encryptor, '123', new UrlManager()));
     }
 
     public async main() {
