@@ -1,7 +1,7 @@
-import { DataEncryptor } from './encryption/types';
-import { DatabaseDecryptionError } from './errors';
-import { IUrlManager } from './types';
-import { base64ToHex, base64ToUnicode, hexToBase64, unicodeToBase64 } from './util';
+import { DataEncryptor } from '../encryption/types';
+import { DatabaseDecryptionError } from '../errors';
+import { IUrlManager } from '../types';
+import { base64ToHex, base64ToUnicode, hexToBase64, unicodeToBase64 } from '../util';
 
 export class UrlDatabase {
     constructor(
@@ -46,18 +46,13 @@ export class UrlDatabase {
 
     public async getDatabaseJsonString(): Promise<string | null> {
         const encryptedDataStringBase64 = this.urlManager.getUrlState();
-        console.log({ encryptedDataStringBase64, password: this.password });
 
         if (!encryptedDataStringBase64) return null;
 
         const encryptedDataStringHex = base64ToHex(encryptedDataStringBase64);
-        let decryptedDataString = await this.dataEncryptor.decrypt(encryptedDataStringHex, this.password);
-
-        console.log({ decryptedDataString });
+        const decryptedDataString = await this.dataEncryptor.decrypt(encryptedDataStringHex, this.password);
 
         const unicodeString = base64ToUnicode(decryptedDataString);
-        console.log({ unicodeString });
-
         return unicodeString;
     }
 

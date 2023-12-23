@@ -1,8 +1,8 @@
 import { UrlDatabase } from '../url-database';
-import { SimpleEncryptor } from '../encryption';
-import { DatabaseDecryptionError } from '../errors';
-import { IUrlManager } from '../types';
-import { config } from '../config';
+import { SimpleEncryptor } from '../../encryption';
+import { DatabaseDecryptionError } from '../../errors';
+import { IUrlManager } from '../../types';
+import { config } from '../../config';
 
 class MockUrlManager implements IUrlManager {
     private urlState: string = '';

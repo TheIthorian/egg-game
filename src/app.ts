@@ -1,7 +1,6 @@
 import { DataEncryptor } from './encryption/types';
 import { SimpleEncryptor } from './encryption';
-import { UrlDatabase } from './url-database';
-import { UrlManager } from './url-manager';
+import { UrlDatabase, UrlManager } from './database';
 import { config } from './config';
 import { base64ToUnicode, unicodeToBase64, hexToBase64 } from './util';
 
