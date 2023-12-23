@@ -4,10 +4,17 @@ import { UrlDatabase, UrlManager } from './database';
 import { config } from './config';
 import { ErrorContainer } from './components/error-container';
 import { UrlDatabaseShowcase } from './components/url-database-showcase';
+import { Egg } from './components/egg';
+import { DataDisplay } from './components/data-display';
+import { DataPublisher } from './database/data-publisher';
+import { Position } from './types';
+import { createDebouncer } from './debouncer';
 
 export class App {
     private errorContainer: ErrorContainer;
     private urlDatabaseShowcase: UrlDatabaseShowcase;
+    private egg: Egg;
+    private dataDisplay: DataDisplay;
 
     constructor(
         private readonly root: HTMLElement,
@@ -17,19 +24,33 @@ export class App {
 
     public static newInstance(root: HTMLElement) {
         const encryptor = new SimpleEncryptor(config.encryptionKey);
-        return new App(root, encryptor, new UrlDatabase(encryptor, '123', new UrlManager()));
+        const dataPublisher = new DataPublisher();
+        const urlDatabase = new UrlDatabase(encryptor, '123', new UrlManager(), dataPublisher);
+        return new App(root, encryptor, urlDatabase);
     }
 
     private attachComponents() {
         this.errorContainer = new ErrorContainer().insert(this.root);
-        this.urlDatabaseShowcase = new UrlDatabaseShowcase(this.dataEncryptor, this.database).insert(this.root, {
-            onError: (error: Error) => this.handleError(error),
+        // this.urlDatabaseShowcase = new UrlDatabaseShowcase(this.dataEncryptor, this.database).insert(this.root, {
+        //     onError: (error: Error) => this.handleError(error),
+        // });
+
+        const databaseUpdateDebouncer = createDebouncer();
+        this.egg = new Egg().insert(this.root, {
+            position: { x: 10, y: 10 },
+            onDrag: e => databaseUpdateDebouncer(() => this.database.set('eggPosition', { x: e.x, y: e.y })),
         });
+
+        this.dataDisplay = new DataDisplay().insert(this.root);
     }
 
     public async main() {
         try {
             this.attachComponents();
+            this.dataDisplay.setData(await this.database.getAll());
+
+            const startPosition = await this.database.get<Position | null>('eggPosition');
+            this.egg.updatePosition(startPosition ?? { x: 20, y: 20 });
         } catch (error) {
             this.handleError(error);
         }
