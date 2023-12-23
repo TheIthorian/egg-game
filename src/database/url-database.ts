@@ -1,13 +1,15 @@
-import { DataEncryptor } from './encryption/types';
-import { DatabaseDecryptionError } from './errors';
-import { IUrlManager } from './types';
-import { base64ToHex, base64ToUnicode, hexToBase64, unicodeToBase64 } from './util';
+import { DataEncryptor } from '../encryption/types';
+import { DatabaseDecryptionError } from '../errors';
+import { IUrlManager } from '../types';
+import { base64ToHex, base64ToUnicode, hexToBase64, unicodeToBase64 } from '../util';
+import { DataPublisher } from './data-publisher';
 
 export class UrlDatabase {
     constructor(
         private readonly dataEncryptor: DataEncryptor,
         private password: string,
-        private readonly urlManager: IUrlManager
+        private readonly urlManager: IUrlManager,
+        private readonly dataPublisher: DataPublisher
     ) {}
 
     public setPassword(password: string) {
@@ -37,27 +39,24 @@ export class UrlDatabase {
         const allData = await this.getAll();
         allData[key] = value;
 
+        this.dataPublisher.publish(allData);
         await this.setDatabaseJsonString(JSON.stringify(allData));
     }
 
     public async setAll(value: Record<string, unknown>) {
+        this.dataPublisher.publish(value);
         this.setDatabaseJsonString(JSON.stringify(value));
     }
 
     public async getDatabaseJsonString(): Promise<string | null> {
         const encryptedDataStringBase64 = this.urlManager.getUrlState();
-        console.log({ encryptedDataStringBase64, password: this.password });
 
         if (!encryptedDataStringBase64) return null;
 
         const encryptedDataStringHex = base64ToHex(encryptedDataStringBase64);
-        let decryptedDataString = await this.dataEncryptor.decrypt(encryptedDataStringHex, this.password);
-
-        console.log({ decryptedDataString });
+        const decryptedDataString = await this.dataEncryptor.decrypt(encryptedDataStringHex, this.password);
 
         const unicodeString = base64ToUnicode(decryptedDataString);
-        console.log({ unicodeString });
-
         return unicodeString;
     }
 

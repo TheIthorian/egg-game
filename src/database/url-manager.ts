@@ -1,4 +1,4 @@
-import { IUrlManager } from './types';
+import { IUrlManager } from '../types';
 
 export class UrlManager implements IUrlManager {
     public getUrlState(): string | null {

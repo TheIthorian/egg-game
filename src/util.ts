@@ -37,3 +37,12 @@ export function base64ToHex(base64String: string): string {
     }
     return result.toUpperCase();
 }
+
+export function htmlEncode(str: string) {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/'/g, '&#39;')
+        .replace(/"/g, '&#34;');
+}
