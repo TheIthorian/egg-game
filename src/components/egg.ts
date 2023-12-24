@@ -14,7 +14,7 @@ export class Egg {
 
         this.eggContainer = document.createElement('div');
         this.eggContainer.innerHTML = `
-        <image draggable=false src='Egg.svg' alt='egg' />
+        <image draggable=false src='Egg.svg' alt='egg' style='object-fit: cover; width: 100%; height: 70px;' />
         `;
         this.eggContainer.style.position = 'absolute';
         this.eggContainer.style.padding = '10px'; // To prevent dropping the egg
