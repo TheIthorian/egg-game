@@ -7,6 +7,7 @@ import { UrlDatabaseShowcase } from './components/url-database-showcase';
 import { Egg } from './components/egg';
 import { DataDisplay } from './components/data-display';
 import { DataPublisher } from './database/data-publisher';
+import { Background } from './components/background';
 import { Position } from './types';
 import { createDebouncer } from './debouncer';
 
@@ -42,6 +43,7 @@ export class App {
         });
 
         this.dataDisplay = new DataDisplay().insert(this.root);
+        new Background().insert(this.root);
     }
 
     public async main() {
