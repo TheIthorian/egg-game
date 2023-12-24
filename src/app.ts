@@ -36,7 +36,8 @@ export class App {
             this.dataDisplay.setData(await this.database.getAll());
 
             const startPosition = await this.database.get<Position | null>('eggPosition');
-            this.egg.updatePosition(startPosition ?? { x: 20, y: 20 });
+
+            this.egg.updatePosition(startPosition ?? { x: 20, y: 20 }, false);
         } catch (error) {
             this.handleError(error);
         }
@@ -51,7 +52,7 @@ export class App {
         const databaseUpdateDebouncer = createDebouncer();
         this.egg = new Egg().insert(this.root, {
             position: { x: 10, y: 10 },
-            onDrag: e => databaseUpdateDebouncer(() => this.database.set('eggPosition', { x: e.x, y: e.y })),
+            onDrag: e => databaseUpdateDebouncer(() => this.database.set('eggPosition', this.egg.getPosition())),
         });
 
         const background = new Background().insert(this.root);

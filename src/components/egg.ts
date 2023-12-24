@@ -14,11 +14,10 @@ export class Egg {
 
         this.eggContainer = document.createElement('div');
         this.eggContainer.innerHTML = `
-        <div>Egg</div>
+        <image draggable=false src='Egg.svg' alt='egg' />
         `;
         this.eggContainer.style.position = 'absolute';
-        this.eggContainer.style.padding = '10px';
-        this.eggContainer.style.backgroundColor = 'red';
+        this.eggContainer.style.padding = '10px'; // To prevent dropping the egg
         this.eggContainer.style.cursor = 'pointer';
 
         this.eggContainer.addEventListener('mousedown', () => {
@@ -43,9 +42,14 @@ export class Egg {
         return this;
     }
 
-    updatePosition({ x, y }: Position) {
-        this.eggContainer.style.left = numberToPx(x - this.eggContainer.clientWidth / 2);
-        this.eggContainer.style.top = numberToPx(y - this.eggContainer.clientHeight / 2);
+    updatePosition({ x, y }: Position, offset = true) {
+        this.eggContainer.style.left = numberToPx(x - (offset ? this.eggContainer.clientWidth / 2 : 0));
+        this.eggContainer.style.top = numberToPx(y - (offset ? this.eggContainer.clientHeight / 2 : 0));
+    }
+
+    getPosition(): Position {
+        const rect = this.eggContainer.getBoundingClientRect();
+        return { x: rect.left, y: rect.top };
     }
 }
 
