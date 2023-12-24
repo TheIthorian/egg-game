@@ -30,6 +30,18 @@ export class App {
         return new App(root, encryptor, urlDatabase);
     }
 
+    public async main() {
+        try {
+            this.attachComponents();
+            this.dataDisplay.setData(await this.database.getAll());
+
+            const startPosition = await this.database.get<Position | null>('eggPosition');
+            this.egg.updatePosition(startPosition ?? { x: 20, y: 20 });
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+
     private attachComponents() {
         this.errorContainer = new ErrorContainer().insert(this.root);
         // this.urlDatabaseShowcase = new UrlDatabaseShowcase(this.dataEncryptor, this.database).insert(this.root, {
@@ -42,20 +54,8 @@ export class App {
             onDrag: e => databaseUpdateDebouncer(() => this.database.set('eggPosition', { x: e.x, y: e.y })),
         });
 
-        this.dataDisplay = new DataDisplay().insert(this.root);
-        new Background().insert(this.root);
-    }
-
-    public async main() {
-        try {
-            this.attachComponents();
-            this.dataDisplay.setData(await this.database.getAll());
-
-            const startPosition = await this.database.get<Position | null>('eggPosition');
-            this.egg.updatePosition(startPosition ?? { x: 20, y: 20 });
-        } catch (error) {
-            this.handleError(error);
-        }
+        const background = new Background().insert(this.root);
+        this.dataDisplay = new DataDisplay().insert(background.getGameContainer());
     }
 
     public handleError(error: Error) {

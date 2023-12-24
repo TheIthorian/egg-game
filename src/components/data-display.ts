@@ -20,7 +20,9 @@ export class DataDisplay {
     public setData(data: Record<string, unknown>) {
         this.data = data;
 
-        this.container.innerHTML = `<pre>${htmlEncode(this.getDisplayText())}</pre>`;
+        this.container.innerHTML = `<pre style='position: absolute; left: 50px; bottom: 50px'>${htmlEncode(
+            this.getDisplayText()
+        )}</pre>`;
     }
 
     private getDisplayText() {
