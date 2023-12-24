@@ -25,7 +25,7 @@ export class Background {
             </div>
             <div id='game-container' style='padding: 30px; background-color: ${STYLE.containerColor}'>
                 <div style='display: flex; flex-direction: row; align-items: center; justify-items: center; font-family: monospace;'>  
-                    <div>FEED EGGS</div>
+                    <h2>FEED EGGS</h2>
                 </div>
             </div>
         </div>
