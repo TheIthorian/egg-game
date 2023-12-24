@@ -1,6 +1,6 @@
-## Static-Website-Base
+## Egg-Game
 
-Base template repo to create static websites from
+A game where you collect eggs
 
 ## Installation
 
@@ -18,4 +18,4 @@ npm run start:dev
 
 ## Deployment
 
-Websites created from this template can be deployed to GitHub pages. To do so, go to `Settings` > `Pages` > Set the `Source` to `GitHub Actions`
+Websites created from this template can be deployed to GitHub pages. To do so, go to `Settings` > `Pages` > Set the `Source` to `GitHub Actions`. There is already a workflow to deploy the resources to GitHub pages.
