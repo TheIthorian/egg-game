@@ -20,7 +20,7 @@ export class App {
     constructor(
         private readonly root: HTMLElement,
         private readonly dataEncryptor: DataEncryptor,
-        private database: UrlDatabase
+        private readonly database: UrlDatabase
     ) {}
 
     public static newInstance(root: HTMLElement) {
