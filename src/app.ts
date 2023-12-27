@@ -10,6 +10,7 @@ import { DataPublisher } from './database/data-publisher';
 import { Background } from './components/background';
 import { Position } from './types';
 import { createDebouncer } from './debouncer';
+import { registerHotkeys } from './hotkey';
 
 export class App {
     private errorContainer: ErrorContainer;
@@ -45,9 +46,6 @@ export class App {
 
     private attachComponents() {
         this.errorContainer = new ErrorContainer().insert(this.root);
-        // this.urlDatabaseShowcase = new UrlDatabaseShowcase(this.dataEncryptor, this.database).insert(this.root, {
-        //     onError: (error: Error) => this.handleError(error),
-        // });
 
         const databaseUpdateDebouncer = createDebouncer();
         this.egg = new Egg().insert(this.root, {
@@ -57,6 +55,15 @@ export class App {
 
         const background = new Background().insert(this.root);
         this.dataDisplay = new DataDisplay().insert(background.getGameContainer());
+
+        registerHotkeys({
+            d: () => this.dataDisplay.toggleDisplay(),
+        });
+
+        window.addEventListener('dataChange', ((e: CustomEvent<{ data: Record<string, unknown> }>) => {
+            const data = e.detail.data as Record<string, unknown>;
+            this.dataDisplay.setData(data);
+        }) as EventListener);
     }
 
     public handleError(error: Error) {

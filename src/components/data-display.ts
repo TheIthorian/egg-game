@@ -6,14 +6,7 @@ export class DataDisplay {
 
     public insert(parent: HTMLElement) {
         this.container = document.createElement('div');
-
-        window.addEventListener('dataChange', ((e: CustomEvent<{ data: Record<string, unknown> }>) => {
-            const data = e.detail.data as Record<string, unknown>;
-            this.setData(data);
-        }) as EventListener);
-
         parent.appendChild(this.container);
-
         return this;
     }
 
@@ -27,5 +20,9 @@ export class DataDisplay {
 
     private getDisplayText() {
         return JSON.stringify(this.data, null, 4);
+    }
+
+    public toggleDisplay() {
+        this.container.classList.toggle('hidden');
     }
 }
