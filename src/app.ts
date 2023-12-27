@@ -11,11 +11,13 @@ import { Background } from './components/background';
 import { Position } from './types';
 import { createDebouncer } from './debouncer';
 import { registerHotkeys } from './hotkey';
+import { Nest } from './components/nest';
 
 export class App {
     private errorContainer: ErrorContainer;
     private urlDatabaseShowcase: UrlDatabaseShowcase;
     private egg: Egg;
+    private nest: Nest;
     private dataDisplay: DataDisplay;
 
     constructor(
@@ -46,6 +48,7 @@ export class App {
 
     private attachComponents() {
         this.errorContainer = new ErrorContainer().insert(this.root);
+        this.nest = new Nest().insert(this.root);
 
         const databaseUpdateDebouncer = createDebouncer();
         this.egg = new Egg().insert(this.root, {
