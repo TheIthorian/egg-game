@@ -19,11 +19,12 @@ class MockUrlManager implements IUrlManager {
 describe('UrlDatabase', () => {
     let urlDatabase: UrlDatabase, urlManager: MockUrlManager, dataEncryptor: SimpleEncryptor;
     const password = 'password';
+    const dataPublisher = { publish: () => {} };
 
     beforeEach(() => {
         urlManager = new MockUrlManager();
         dataEncryptor = new SimpleEncryptor(config.encryptionKey);
-        urlDatabase = new UrlDatabase(dataEncryptor, password, urlManager);
+        urlDatabase = new UrlDatabase(dataEncryptor, password, urlManager, dataPublisher);
     });
 
     describe('setAll', () => {
