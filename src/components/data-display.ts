@@ -13,7 +13,7 @@ export class DataDisplay {
     public setData(data: Record<string, unknown>) {
         this.data = data;
 
-        this.container.innerHTML = `<pre style='position: absolute; left: 50px; bottom: 50px'>${htmlEncode(
+        this.container.innerHTML = `<pre style='position: absolute; left: 50px; top: 70px'>${htmlEncode(
             this.getDisplayText()
         )}</pre>`;
     }
