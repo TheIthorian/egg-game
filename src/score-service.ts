@@ -10,6 +10,10 @@ export class ScoreService {
         await this.database.update<number>('score', (score = 0) => score + scored);
     }
 
+    async resetScore() {
+        await this.database.set<number>('score', 0);
+    }
+
     private getZoomFactor() {
         return (window.outerWidth - 10) / window.innerWidth;
     }

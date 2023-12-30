@@ -6,3 +6,4 @@ export { Mouth } from './mouth';
 export { Nest } from './nest';
 export { UrlDatabaseShowcase } from './url-database-showcase';
 export { ResetScore } from './reset-score';
+export { ScoreDisplay } from './score-display';

@@ -17,6 +17,7 @@ import {
     Nest,
     Mouth,
     ResetScore,
+    ScoreDisplay,
 } from './components';
 import { distance } from './util';
 
@@ -27,6 +28,7 @@ export class App {
     private nest: Nest;
     private mouth: Mouth;
     private dataDisplay: DataDisplay;
+    private scoreDisplay: ScoreDisplay;
 
     constructor(
         private readonly root: HTMLElement,
@@ -78,7 +80,8 @@ export class App {
         this.dataDisplay = new DataDisplay().insert(background.getGameContainer());
         this.mouth = new Mouth().insert(this.root);
 
-        new ResetScore(this.database).insert(this.root);
+        new ResetScore(this.scoreService).insert(this.root);
+        this.scoreDisplay = new ScoreDisplay().insert(this.root);
 
         if (await this.database.get('hasEgg')) {
             this.egg = new Egg().insert(this.root, {
@@ -90,11 +93,13 @@ export class App {
 
         registerHotkeys({
             d: () => this.dataDisplay.toggleDisplay(),
+            r: () => this.scoreService.resetScore(),
         });
 
         window.addEventListener('dataChange', ((e: CustomEvent<{ data: Record<string, unknown> }>) => {
             const data = e.detail.data as Record<string, unknown>;
             this.dataDisplay.setData(data);
+            this.scoreDisplay.setScore((data.score as number) ?? 0);
         }) as EventListener);
     }
 

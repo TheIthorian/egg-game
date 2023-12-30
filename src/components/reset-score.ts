@@ -1,9 +1,9 @@
-import { UrlDatabase } from '../database';
+import { ScoreService } from '../score-service';
 
 export class ResetScore {
     private container: HTMLDivElement;
 
-    constructor(private readonly database: UrlDatabase) {}
+    constructor(private readonly scoreService: ScoreService) {}
 
     public insert(parent: HTMLElement) {
         this.container = document.createElement('div');
@@ -16,6 +16,6 @@ export class ResetScore {
     }
 
     public resetScore() {
-        this.database.set('score', 0);
+        this.scoreService.resetScore();
     }
 }
