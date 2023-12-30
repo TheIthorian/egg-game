@@ -43,6 +43,12 @@ export class UrlDatabase {
         await this.setDatabaseJsonString(JSON.stringify(allData));
     }
 
+    public async update<T>(key: string, updater: (currentValue?: T) => Promise<T> | T) {
+        const currentValue = await this.get<T>(key);
+        const newValue = await updater(currentValue);
+        await this.set(key, newValue);
+    }
+
     public async setAll(value: Record<string, unknown>) {
         this.dataPublisher.publish(value);
         this.setDatabaseJsonString(JSON.stringify(value));
