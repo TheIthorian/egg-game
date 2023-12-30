@@ -2,22 +2,29 @@ import { DataEncryptor } from './encryption/types';
 import { SimpleEncryptor } from './encryption';
 import { UrlDatabase, UrlManager } from './database';
 import { config } from './config';
-import { ErrorContainer } from './components/error-container';
-import { UrlDatabaseShowcase } from './components/url-database-showcase';
-import { Egg } from './components/egg';
-import { DataDisplay } from './components/data-display';
 import { DataPublisher } from './database/data-publisher';
-import { Background } from './components/background';
 import { Position } from './types';
 import { createDebouncer } from './debouncer';
 import { registerHotkeys } from './hotkey';
-import { Nest } from './components/nest';
+
+import {
+    ErrorContainer,
+    UrlDatabaseShowcase,
+    Egg,
+    DataDisplay,
+    Background,
+    Nest,
+    Mouth,
+    ResetScore,
+} from './components';
+import { distance } from './util';
 
 export class App {
     private errorContainer: ErrorContainer;
     private urlDatabaseShowcase: UrlDatabaseShowcase;
     private egg: Egg;
     private nest: Nest;
+    private mouth: Mouth;
     private dataDisplay: DataDisplay;
 
     constructor(
@@ -35,29 +42,48 @@ export class App {
 
     public async main() {
         try {
-            this.attachComponents();
+            await this.attachComponents();
             this.dataDisplay.setData(await this.database.getAll());
-
-            const startPosition = await this.database.get<Position | null>('eggPosition');
-
-            this.egg.updatePosition(startPosition ?? { x: 20, y: 20 }, false);
         } catch (error) {
             this.handleError(error);
         }
     }
 
-    private attachComponents() {
-        this.errorContainer = new ErrorContainer().insert(this.root);
-        this.nest = new Nest().insert(this.root);
-
+    private async attachComponents() {
         const databaseUpdateDebouncer = createDebouncer();
-        this.egg = new Egg().insert(this.root, {
-            position: { x: 10, y: 10 },
-            onDrag: e => databaseUpdateDebouncer(() => this.database.set('eggPosition', this.egg.getPosition())),
-        });
+        const onDrag = () => databaseUpdateDebouncer(() => this.database.set('eggPosition', this.egg.getPosition()));
+        const onDrop = (e: MouseEvent) => this.handleDropEgg(e);
+
+        this.errorContainer = new ErrorContainer().insert(this.root);
+
+        this.nest = new Nest({
+            spawnEgg: async (position: Position) => {
+                if ((await this.database.get('hasEgg')) && this.egg) return;
+
+                this.egg = new Egg().insert(this.root, {
+                    position,
+                    onDrag,
+                    onDrop,
+                    isDragging: true,
+                });
+                await this.database.set('hasEgg', true);
+                await this.database.set('eggPosition', this.egg.getPosition());
+            },
+        }).insert(this.root);
 
         const background = new Background().insert(this.root);
         this.dataDisplay = new DataDisplay().insert(background.getGameContainer());
+        this.mouth = new Mouth().insert(this.root);
+
+        new ResetScore(this.database).insert(this.root);
+
+        if (await this.database.get('hasEgg')) {
+            this.egg = new Egg().insert(this.root, {
+                position: await this.database.get('eggPosition'),
+                onDrag,
+                onDrop,
+            });
+        }
 
         registerHotkeys({
             d: () => this.dataDisplay.toggleDisplay(),
@@ -67,6 +93,19 @@ export class App {
             const data = e.detail.data as Record<string, unknown>;
             this.dataDisplay.setData(data);
         }) as EventListener);
+    }
+
+    private async handleDropEgg(event: MouseEvent) {
+        if (!this.mouth.isWithinBounds({ x: event.clientX, y: event.clientY })) return;
+
+        const distanceBetween = distance(this.mouth.getPosition(), this.nest.getPosition());
+        const scored = Math.max(Math.floor(distanceBetween / 100), 1);
+
+        await Promise.all([
+            this.database.update<number>('score', score => score + scored),
+            this.database.set('hasEgg', false),
+        ]);
+        this.egg.delete();
     }
 
     public handleError(error: Error) {

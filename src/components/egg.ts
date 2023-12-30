@@ -1,16 +1,19 @@
 import { Position } from '../types';
 
-type DragEventHandler = (event: MouseEvent) => void;
+type MouseEventHandler = (event: MouseEvent) => void;
 
-type EggProps = { position: Position; onDrag: DragEventHandler };
+type EggProps = { position: Position; onDrag: MouseEventHandler; onDrop: MouseEventHandler; isDragging?: boolean };
 
 export class Egg {
-    eggContainer: HTMLDivElement;
+    private eggContainer: HTMLDivElement;
     isDragging = false;
-    onDrag: DragEventHandler;
+    onDrag: MouseEventHandler;
+    onDrop: MouseEventHandler;
 
-    insert(parent: HTMLElement, { position, onDrag }: EggProps) {
+    insert(parent: HTMLElement, { position, onDrag, isDragging, onDrop }: EggProps) {
         this.onDrag = onDrag;
+        this.onDrop = onDrop;
+        this.isDragging = isDragging ?? false;
 
         this.eggContainer = document.createElement('div');
         this.eggContainer.innerHTML = `
@@ -31,13 +34,17 @@ export class Egg {
             onDrag(event);
         });
 
-        this.eggContainer.addEventListener('mouseup', () => {
+        this.eggContainer.addEventListener('mouseup', e => {
+            if (this.isDragging) {
+                this.onDrop(e);
+            }
+
             this.isDragging = false;
         });
 
-        this.updatePosition(position);
-
         parent.appendChild(this.eggContainer);
+
+        setTimeout(() => this.updatePosition(position), 100);
 
         return this;
     }
@@ -50,6 +57,10 @@ export class Egg {
     getPosition(): Position {
         const rect = this.eggContainer.getBoundingClientRect();
         return { x: rect.left, y: rect.top };
+    }
+
+    delete(): void {
+        this.eggContainer.remove();
     }
 }
 
