@@ -6,6 +6,7 @@ import { DataPublisher } from './database/data-publisher';
 import { Position } from './types';
 import { createDebouncer } from './debouncer';
 import { registerHotkeys } from './hotkey';
+import { ScoreService } from './score-service';
 
 import {
     ErrorContainer,
@@ -30,14 +31,16 @@ export class App {
     constructor(
         private readonly root: HTMLElement,
         private readonly dataEncryptor: DataEncryptor,
-        private readonly database: UrlDatabase
+        private readonly database: UrlDatabase,
+        private readonly scoreService: ScoreService
     ) {}
 
     public static newInstance(root: HTMLElement) {
         const encryptor = new SimpleEncryptor(config.encryptionKey);
         const dataPublisher = new DataPublisher();
         const urlDatabase = new UrlDatabase(encryptor, '123', new UrlManager(), dataPublisher);
-        return new App(root, encryptor, urlDatabase);
+        const scoreService = new ScoreService(urlDatabase);
+        return new App(root, encryptor, urlDatabase, scoreService);
     }
 
     public async main() {
@@ -99,10 +102,8 @@ export class App {
         if (!this.mouth.isWithinBounds({ x: event.clientX, y: event.clientY })) return;
 
         const distanceBetween = distance(this.mouth.getPosition(), this.nest.getPosition());
-        const scored = Math.max(Math.floor(distanceBetween / 100), 1);
-
         await Promise.all([
-            this.database.update<number>('score', score => score + scored),
+            this.scoreService.increaseScoreForEggDrag(distanceBetween),
             this.database.set('hasEgg', false),
         ]);
         this.egg.delete();
