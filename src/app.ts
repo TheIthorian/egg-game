@@ -18,8 +18,11 @@ import {
     Mouth,
     ResetScore,
     ScoreDisplay,
+    GameModeToggle,
+    UIControls,
 } from './components';
 import { distance } from './util';
+import { GameMode } from 'components/game-mode-toggle';
 
 export class App {
     private errorContainer: ErrorContainer;
@@ -29,6 +32,7 @@ export class App {
     private mouth: Mouth;
     private dataDisplay: DataDisplay;
     private scoreDisplay: ScoreDisplay;
+    private gameModeToggle: GameModeToggle;
 
     constructor(
         private readonly root: HTMLElement,
@@ -81,8 +85,12 @@ export class App {
         this.dataDisplay = new DataDisplay().insert(background.getGameContainer());
         this.mouth = new Mouth().insert(this.root);
 
-        new ResetScore(this.scoreService).insert(this.root);
+        const uiControls = new UIControls().insert(this.root);
+
+        new ResetScore(this.scoreService).insert(uiControls.getDomElement());
         this.scoreDisplay = new ScoreDisplay().insert(this.root);
+
+        this.gameModeToggle = await new GameModeToggle(this.database).insert(uiControls.getDomElement());
 
         if (await this.database.get('hasEgg')) {
             this.egg = new Egg().insert(this.root, {
@@ -100,7 +108,8 @@ export class App {
         window.addEventListener('dataChange', ((e: CustomEvent<{ data: Record<string, unknown> }>) => {
             const data = e.detail.data as Record<string, unknown>;
             this.dataDisplay.setData(data);
-            this.scoreDisplay.setScore((data.score as number) ?? 0);
+            this.scoreDisplay.setScore(<number>data.score ?? 0);
+            this.gameModeToggle.setMode(<GameMode>data.gameMode);
         }) as EventListener);
     }
 

@@ -4,6 +4,8 @@ export { Egg } from './egg';
 export { ErrorContainer } from './error-container';
 export { Mouth } from './mouth';
 export { Nest } from './nest';
+export { GameModeToggle } from './game-mode-toggle';
 export { UrlDatabaseShowcase } from './url-database-showcase';
 export { ResetScore } from './reset-score';
 export { ScoreDisplay } from './score-display';
+export { UIControls } from './ui-controls';
