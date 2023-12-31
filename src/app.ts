@@ -34,7 +34,8 @@ export class App {
         private readonly root: HTMLElement,
         private readonly dataEncryptor: DataEncryptor,
         private readonly database: UrlDatabase,
-        private readonly scoreService: ScoreService
+        private readonly scoreService: ScoreService,
+        private readonly dataPublisher: DataPublisher
     ) {}
 
     public static newInstance(root: HTMLElement) {
@@ -42,13 +43,13 @@ export class App {
         const dataPublisher = new DataPublisher();
         const urlDatabase = new UrlDatabase(encryptor, '123', new UrlManager(), dataPublisher);
         const scoreService = new ScoreService(urlDatabase);
-        return new App(root, encryptor, urlDatabase, scoreService);
+        return new App(root, encryptor, urlDatabase, scoreService, dataPublisher);
     }
 
     public async main() {
         try {
             await this.attachComponents();
-            this.dataDisplay.setData(await this.database.getAll());
+            this.dataPublisher.publish(await this.database.getAll());
         } catch (error) {
             this.handleError(error);
         }
