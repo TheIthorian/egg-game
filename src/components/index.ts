@@ -1,6 +1,7 @@
 export { Background } from './background';
 export { DataDisplay } from './data-display';
 export { Egg } from './egg';
+export { EggCountPopup } from './egg-count-popup';
 export { EggPurchasePopup } from './egg-purchase-popup';
 export { ErrorContainer } from './error-container';
 export { Mouth } from './mouth';

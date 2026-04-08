@@ -19,6 +19,7 @@ import {
 import {
     ErrorContainer,
     Egg,
+    EggCountPopup,
     EggPurchasePopup,
     DataDisplay,
     Background,
@@ -45,6 +46,7 @@ export class App {
     private dataDisplay: DataDisplay;
     private scoreDisplay: ScoreDisplay;
     private scorePopup: ScorePopup;
+    private eggCountPopup: EggCountPopup;
     private eggPurchasePopup: EggPurchasePopup;
     private gameModeToggle: GameModeToggle;
 
@@ -109,6 +111,7 @@ export class App {
 
         this.scoreDisplay = new ScoreDisplay().insert(this.root);
         this.scorePopup = new ScorePopup(MIN_SCORE_POPUP_DELTA, MAX_SCORE_POPUP_DELTA).insert(this.root);
+        this.eggCountPopup = new EggCountPopup().insert(this.root);
 
         this.eggPurchasePopup = new EggPurchasePopup({
             onPurchaseConfirmed: async eggCount => {
@@ -117,6 +120,7 @@ export class App {
                     ...data,
                     eggCount,
                     eggDeductionFactor: PURCHASED_EGG_DEDUCTION_FACTOR,
+                    shouldShowEggCountPopupAfterNextFeed: true,
                 });
             },
         }).insert(this.root);
@@ -158,14 +162,23 @@ export class App {
 
         const distanceBetween = distance(this.mouth.getPosition(), this.nest.getPosition());
         const data = await this.database.getAll();
+        const eggCount = <number>data.eggCount ?? STARTING_EGG_COUNT;
         const score = <number>data.score ?? 0;
         const eggsEaten = <number>data.eggsEaten ?? 0;
+        const shouldShowEggCountPopupAfterNextFeed = <boolean>data.shouldShowEggCountPopupAfterNextFeed;
+
+        console.log({ shouldShowEggCountPopupAfterNextFeed });
+
+        if (shouldShowEggCountPopupAfterNextFeed) {
+            this.eggCountPopup.show(eggCount);
+        }
 
         await this.database.setAll({
             ...data,
             score: score + this.scoreService.getScoreForEggDrag(distanceBetween),
             hasEgg: false,
             eggsEaten: eggsEaten + 1,
+            shouldShowEggCountPopupAfterNextFeed: false,
         });
 
         this.egg.delete();
@@ -178,6 +191,7 @@ export class App {
             eggCount: data.eggCount ?? STARTING_EGG_COUNT,
             eggDeductionFactor: data.eggDeductionFactor ?? DEFAULT_EGG_DEDUCTION_FACTOR,
             eggsEaten: data.eggsEaten ?? 0,
+            shouldShowEggCountPopupAfterNextFeed: data.shouldShowEggCountPopupAfterNextFeed ?? false,
         };
         await this.database.setAll(nextData);
         this.dataPublisher.publish(data);

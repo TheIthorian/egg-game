@@ -74,6 +74,7 @@ export class EggPurchasePopup {
                     Would you like to buy<br />
                     an ${eggCount} pack of eggs?
                 `;
+
         this.resetInputs();
         this.container.style.display = 'block';
         this.inputElement.focus();
