@@ -7,7 +7,7 @@ import { Position } from './types';
 import { createDebouncer } from './debouncer';
 import { registerHotkeys } from './hotkey';
 import { ScoreService } from './score-service';
-import { INITIAL_EGG_COUNT, MAX_SCORE_POPUP_DELTA, MIN_SCORE_POPUP_DELTA } from './constants';
+import { MAX_SCORE_POPUP_DELTA, MIN_SCORE_POPUP_DELTA, STARTING_EGG_COUNT, STORE_EGG_COUNT } from './constants';
 
 import {
     ErrorContainer,
@@ -80,7 +80,7 @@ export class App {
         }).insert(this.root);
 
         this.nest = new Nest(this.database, {
-            onNoEgg: () => this.eggPurchasePopup.show(INITIAL_EGG_COUNT),
+            onNoEgg: () => this.eggPurchasePopup.show(STORE_EGG_COUNT),
             spawnEgg: async (position: Position) => {
                 // There's already an egg in play
                 if ((await this.database.get('hasEgg')) && this.egg) return;
@@ -129,7 +129,7 @@ export class App {
             const previousData = e.detail.previousData;
             const score = <number>data.score ?? 0;
             const previousScore = <number>previousData.score ?? 0;
-            const eggCount = <number>data.eggCount;
+            const eggCount = <number>data.eggCount ?? STARTING_EGG_COUNT;
 
             this.nest.setEggCount(eggCount);
             this.dataDisplay.setData(data);
@@ -159,7 +159,7 @@ export class App {
 
     private async publishInitialState() {
         const data = await this.database.getAll();
-        const nextData = { ...data, eggCount: data.eggCount ?? INITIAL_EGG_COUNT, eggsEaten: data.eggsEaten ?? 0 };
+        const nextData = { ...data, eggCount: data.eggCount ?? STARTING_EGG_COUNT, eggsEaten: data.eggsEaten ?? 0 };
         await this.database.setAll(nextData);
         this.dataPublisher.publish(data);
     }

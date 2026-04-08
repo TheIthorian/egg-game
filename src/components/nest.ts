@@ -1,5 +1,5 @@
 import { Position } from 'types';
-import { INITIAL_EGG_COUNT } from '../constants';
+import { STARTING_EGG_COUNT } from '../constants';
 import { UrlDatabase } from '../database';
 
 type NestOptions = {
@@ -27,7 +27,7 @@ export class Nest {
 
         this.nestContainer.innerHTML = `
         <image draggable=false src='Eggs.svg' alt='nest' style='object-fit: cover; width: 100%; height: 150px;' />
-        <div id='egg-count' style='text-align: center; margin-top: 12px; font-size: 28px;'>EGGS: ${INITIAL_EGG_COUNT}</div>
+        <div id='egg-count' style='text-align: center; margin-top: 12px; font-size: 28px;'>EGGS:</div>
         `;
 
         this.eggCountElement = this.nestContainer.querySelector('#egg-count')!;
@@ -35,7 +35,7 @@ export class Nest {
         parent.appendChild(this.nestContainer);
 
         this.nestContainer.addEventListener('pointerdown', async (e: PointerEvent) => {
-            const eggCount = (await this.database.get<number>('eggCount')) ?? INITIAL_EGG_COUNT;
+            const eggCount = (await this.database.get<number>('eggCount')) ?? STARTING_EGG_COUNT;
 
             if (eggCount <= 0) {
                 this.nestOptions.onNoEgg();
