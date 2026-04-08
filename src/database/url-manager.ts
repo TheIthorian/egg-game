@@ -1,5 +1,8 @@
 import { IUrlManager } from '../types';
 
+/**
+ * Reads and writes the serialized game state from the current page URL.
+ */
 export class UrlManager implements IUrlManager {
     public getUrlState(): string | null {
         return new URL(window.location.href).searchParams.get('state');
@@ -8,6 +11,12 @@ export class UrlManager implements IUrlManager {
     public setUrlState(value: string) {
         const currentUrl = new URL(window.location.href);
         currentUrl.searchParams.set('state', value);
+        history.replaceState(null, '', currentUrl);
+    }
+
+    public clearUrlState() {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.delete('state');
         history.replaceState(null, '', currentUrl);
     }
 }

@@ -4,6 +4,9 @@ import { IUrlManager } from '../types';
 import { base64ToHex, base64ToUnicode, hexToBase64, unicodeToBase64 } from '../util';
 import { DataPublisher } from './data-publisher';
 
+/**
+ * Persists the entire game state object into the `state` query parameter and republishes updates.
+ */
 export class UrlDatabase {
     constructor(
         private readonly dataEncryptor: DataEncryptor,
@@ -17,7 +20,7 @@ export class UrlDatabase {
     }
 
     /**
-     * Get a the value for a given database key
+     * Returns the value for one state key, or the provided default when the key is absent.
      * @throws `DatabaseDecryptionError`
      */
     public async get<T>(key: string, defaultValue?: T): Promise<T | null> {
@@ -25,6 +28,9 @@ export class UrlDatabase {
         return <T>allData[key] ?? defaultValue ?? null;
     }
 
+    /**
+     * Loads, decrypts, and parses the full persisted state object from the URL.
+     */
     public async getAll(): Promise<Record<string, unknown>> {
         try {
             const dataString = (await this.getDatabaseJsonString()) ?? '{}';
@@ -36,18 +42,42 @@ export class UrlDatabase {
     }
 
     public async set<T>(key: string, value: T) {
-        const allData = await this.getAll();
+        const previousData = await this.getAll();
+        const allData = { ...previousData };
         allData[key] = value;
 
-        this.dataPublisher.publish(allData);
+        this.dataPublisher.publish(allData, previousData);
         await this.setDatabaseJsonString(JSON.stringify(allData));
     }
 
+    /**
+     * Replaces one state key using its current value, then persists and republishes the result.
+     */
+    public async update<T>(key: string, updater: (currentValue?: T) => Promise<T> | T) {
+        const currentValue = await this.get<T>(key);
+        const newValue = await updater(currentValue);
+        await this.set(key, newValue);
+    }
+
+    /**
+     * Replaces the full state object in one write operation.
+     */
     public async setAll(value: Record<string, unknown>) {
-        this.dataPublisher.publish(value);
+        const previousData = await this.getAll();
+        this.dataPublisher.publish(value, previousData);
         this.setDatabaseJsonString(JSON.stringify(value));
     }
 
+    /**
+     * Clears all persisted state from the backing store.
+     */
+    public drop() {
+        this.urlManager.clearUrlState();
+    }
+
+    /**
+     * Reads the raw persisted JSON string after URL decoding and decryption, before parsing.
+     */
     public async getDatabaseJsonString(): Promise<string | null> {
         const encryptedDataStringBase64 = this.urlManager.getUrlState();
 
@@ -60,6 +90,9 @@ export class UrlDatabase {
         return unicodeString;
     }
 
+    /**
+     * Serializes and stores the provided JSON string back into the URL-safe encrypted representation.
+     */
     public async setDatabaseJsonString(value: string): Promise<void> {
         const encryptedString = await this.dataEncryptor.encrypt(unicodeToBase64(value), this.password);
 

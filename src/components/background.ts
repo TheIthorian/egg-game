@@ -3,8 +3,11 @@ const STYLE = {
     containerColor: '#e1e1e1',
 } as const;
 
+/**
+ * Renders the static playfield
+ */
 export class Background {
-    private container: HTMLDivElement;
+    protected container: HTMLDivElement;
 
     public insert(parent: HTMLElement) {
         this.container = document.createElement('div');

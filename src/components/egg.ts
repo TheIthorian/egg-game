@@ -1,16 +1,22 @@
 import { Position } from '../types';
 
-type DragEventHandler = (event: MouseEvent) => void;
+type PointerEventHandler = (event: PointerEvent) => void;
 
-type EggProps = { position: Position; onDrag: DragEventHandler };
+type EggProps = { position: Position; onDrag: PointerEventHandler; onDrop: PointerEventHandler; isDragging?: boolean };
 
+/**
+ * Draggable game object that tracks its on-screen position and drag lifecycle.
+ */
 export class Egg {
-    eggContainer: HTMLDivElement;
+    private eggContainer: HTMLDivElement;
     isDragging = false;
-    onDrag: DragEventHandler;
+    onDrag: PointerEventHandler;
+    onDrop: PointerEventHandler;
 
-    insert(parent: HTMLElement, { position, onDrag }: EggProps) {
+    insert(parent: HTMLElement, { position, onDrag, isDragging, onDrop }: EggProps) {
         this.onDrag = onDrag;
+        this.onDrop = onDrop;
+        this.isDragging = isDragging ?? false;
 
         this.eggContainer = document.createElement('div');
         this.eggContainer.innerHTML = `
@@ -19,29 +25,40 @@ export class Egg {
         this.eggContainer.style.position = 'absolute';
         this.eggContainer.style.padding = '10px'; // To prevent dropping the egg
         this.eggContainer.style.cursor = 'pointer';
+        this.eggContainer.style.touchAction = 'none';
 
-        this.eggContainer.addEventListener('mousedown', () => {
+        this.eggContainer.addEventListener('pointerdown', event => {
+            this.eggContainer.setPointerCapture(event.pointerId);
             this.isDragging = true;
         });
 
-        document.addEventListener('mousemove', event => {
+        document.addEventListener('pointermove', event => {
             if (!this.isDragging) return;
 
-            this.updatePosition({ x: event.x, y: event.y });
+            this.updatePosition({ x: event.clientX, y: event.clientY });
             onDrag(event);
         });
 
-        this.eggContainer.addEventListener('mouseup', () => {
-            this.isDragging = false;
-        });
+        const finishDrag = (event: PointerEvent) => {
+            if (!this.isDragging) return;
 
-        this.updatePosition(position);
+            this.onDrop(event);
+            this.isDragging = false;
+        };
+
+        document.addEventListener('pointerup', finishDrag);
+        document.addEventListener('pointercancel', finishDrag);
 
         parent.appendChild(this.eggContainer);
+
+        setTimeout(() => this.updatePosition(position), 100);
 
         return this;
     }
 
+    /**
+     * Moves the egg to a screen position, optionally centering it on the supplied coordinates.
+     */
     updatePosition({ x, y }: Position, offset = true) {
         this.eggContainer.style.left = numberToPx(x - (offset ? this.eggContainer.clientWidth / 2 : 0));
         this.eggContainer.style.top = numberToPx(y - (offset ? this.eggContainer.clientHeight / 2 : 0));
@@ -50,6 +67,13 @@ export class Egg {
     getPosition(): Position {
         const rect = this.eggContainer.getBoundingClientRect();
         return { x: rect.left, y: rect.top };
+    }
+
+    /**
+     * Removes the egg from the DOM
+     */
+    delete(): void {
+        this.eggContainer.remove();
     }
 }
 

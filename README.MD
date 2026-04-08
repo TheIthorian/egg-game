@@ -1,6 +1,6 @@
 ## Egg-Game
 
-A game where you collect eggs
+A game where you collect eggs. Inspired by [I Think You Should Leave](https://www.youtube.com/watch?v=K0OSfbPJFa4)
 
 ## Installation
 

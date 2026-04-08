@@ -1,3 +1,5 @@
+import { Position } from 'types';
+
 export function unicodeToBase64(inputString: string): string {
     const utf8Bytes = encodeURIComponent(inputString).replace(/%([0-9A-F]{2})/g, (_, p1) =>
         String.fromCharCode(parseInt(p1, 16))
@@ -45,4 +47,12 @@ export function htmlEncode(str: string) {
         .replace(/>/g, '&gt;')
         .replace(/'/g, '&#39;')
         .replace(/"/g, '&#34;');
+}
+
+export function distance(a: Position, b: Position): number {
+    return Math.pow(distance2(a, b), 0.5);
+}
+
+export function distance2(a: Position, b: Position): number {
+    return (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 }

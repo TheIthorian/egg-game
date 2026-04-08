@@ -1,5 +1,8 @@
 import { DataEncryptor } from './types';
 
+/**
+ * Lightweight reversible encoder used by the browser runtime for URL-backed state.
+ */
 export class SimpleEncryptor implements DataEncryptor {
     constructor(private readonly key: string) {}
 
