@@ -14,6 +14,10 @@ class MockUrlManager implements IUrlManager {
     setUrlState(value: string): void {
         this.urlState = value;
     }
+
+    clearUrlState(): void {
+        this.urlState = '';
+    }
 }
 
 describe('UrlDatabase', () => {
@@ -74,6 +78,16 @@ describe('UrlDatabase', () => {
             urlManager.setUrlState(encryptedData);
 
             await expect(urlDatabase.getAll()).rejects.toThrow(DatabaseDecryptionError);
+        });
+    });
+
+    describe('drop', () => {
+        it('should clear the persisted url state', async () => {
+            await urlDatabase.set('key1', 'value1');
+
+            urlDatabase.drop();
+
+            expect(urlManager.getUrlState()).toBe('');
         });
     });
 });

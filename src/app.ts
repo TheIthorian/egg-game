@@ -69,7 +69,10 @@ export class App {
         const onDrag = () => databaseUpdateDebouncer(() => this.database.set('eggPosition', this.egg.getPosition()));
         const onDrop = (e: MouseEvent) => this.handleDropEgg(e);
 
-        this.errorContainer = new ErrorContainer().insert(this.root);
+        this.errorContainer = new ErrorContainer(() => {
+            this.database.drop();
+            window.location.reload();
+        }).insert(this.root);
 
         this.nest = new Nest({
             spawnEgg: async (position: Position) => {

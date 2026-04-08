@@ -67,6 +67,13 @@ export class UrlDatabase {
     }
 
     /**
+     * Clears all persisted state from the backing store.
+     */
+    public drop() {
+        this.urlManager.clearUrlState();
+    }
+
+    /**
      * Reads the raw persisted JSON string after URL decoding and decryption, before parsing.
      */
     public async getDatabaseJsonString(): Promise<string | null> {

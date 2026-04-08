@@ -13,4 +13,10 @@ export class UrlManager implements IUrlManager {
         currentUrl.searchParams.set('state', value);
         history.replaceState(null, '', currentUrl);
     }
+
+    public clearUrlState() {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.delete('state');
+        history.replaceState(null, '', currentUrl);
+    }
 }
