@@ -10,6 +10,7 @@ export class DataDisplay {
     public insert(parent: HTMLElement) {
         this.container = document.createElement('div');
         parent.appendChild(this.container);
+        this.toggleDisplay();
         return this;
     }
 
