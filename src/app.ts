@@ -24,6 +24,9 @@ import {
 import { distance } from './util';
 import { GameMode } from 'components/game-mode-toggle';
 
+/**
+ * Composes the game runtime, wires shared services together, and coordinates UI updates.
+ */
 export class App {
     private errorContainer: ErrorContainer;
     private urlDatabaseShowcase: UrlDatabaseShowcase;
@@ -50,6 +53,9 @@ export class App {
         return new App(root, encryptor, urlDatabase, scoreService, dataPublisher);
     }
 
+    /**
+     * Boots the application, attaches the UI, and publishes the initial persisted state.
+     */
     public async main() {
         try {
             await this.attachComponents();
@@ -124,6 +130,9 @@ export class App {
         this.egg.delete();
     }
 
+    /**
+     * Routes runtime errors to the shared error display.
+     */
     public handleError(error: Error) {
         this.errorContainer.setError(error);
     }

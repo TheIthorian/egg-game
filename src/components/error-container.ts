@@ -1,3 +1,6 @@
+/**
+ * Renders user-visible runtime errors into a dedicated DOM node.
+ */
 export class ErrorContainer {
     private errorElement: HTMLDivElement;
 

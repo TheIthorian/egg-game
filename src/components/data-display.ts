@@ -1,5 +1,8 @@
 import { htmlEncode } from '../util';
 
+/**
+ * Shows the current persisted state as formatted debug JSON.
+ */
 export class DataDisplay {
     private container: HTMLDivElement;
     private data: Record<string, unknown>;

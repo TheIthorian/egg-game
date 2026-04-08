@@ -5,6 +5,9 @@ const ALGORITHM = 'aes256';
 const ENCODING = 'base64';
 const HASH_ALGORITHM = 'sha512';
 
+/**
+ * Node-oriented AES encryptor.
+ */
 export class NodeEncryptor implements DataEncryptor {
     constructor(private readonly key: string) {}
 

@@ -1,5 +1,8 @@
 import { IUrlManager } from '../types';
 
+/**
+ * Reads and writes the serialized game state from the current page URL.
+ */
 export class UrlManager implements IUrlManager {
     public getUrlState(): string | null {
         return new URL(window.location.href).searchParams.get('state');

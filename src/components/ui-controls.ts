@@ -1,3 +1,6 @@
+/**
+ * Horizontal layout container for top-level control widgets.
+ */
 export class UIControls {
     private container: HTMLDivElement;
 

@@ -8,6 +8,9 @@ type UrlDatabaseShowcaseProps = {
     onError: ErrorHandler;
 };
 
+/**
+ * Demo/debug component that shows how plain JSON moves through encoding, encryption, and URL storage.
+ */
 export class UrlDatabaseShowcase {
     private textInput: HTMLDivElement;
     onError: ErrorHandler;

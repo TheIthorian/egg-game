@@ -1,3 +1,6 @@
+/**
+ * Broadcasts the latest persisted state to browser listeners after each write.
+ */
 export class DataPublisher {
     publish(data: Record<string, unknown>) {
         const event = new CustomEvent<Record<string, unknown>>('dataChange', {

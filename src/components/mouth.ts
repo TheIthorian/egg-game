@@ -1,5 +1,8 @@
 import { Position } from '../types';
 
+/**
+ * Defines the egg drop target and hit-test area.
+ */
 export class Mouth {
     private container: HTMLDivElement;
 
@@ -20,6 +23,9 @@ export class Mouth {
         return this;
     }
 
+    /**
+     * Reports whether a screen coordinate falls inside the mouth's current bounding box.
+     */
     public isWithinBounds({ x, y }: Position) {
         const rect = this.container.getBoundingClientRect();
 
@@ -28,6 +34,9 @@ export class Mouth {
         return rect.left < x && rect.right > x && rect.top < y && rect.bottom > y;
     }
 
+    /**
+     * Returns the mouth's top-left screen position for distance calculations.
+     */
     public getPosition(): Position {
         const { x, y } = this.container.getBoundingClientRect();
         return { x, y };

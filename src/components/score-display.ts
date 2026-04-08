@@ -1,3 +1,6 @@
+/**
+ * Displays the current score in the top-right corner of the playfield.
+ */
 export class ScoreDisplay {
     private container: HTMLDivElement;
     private score: number;

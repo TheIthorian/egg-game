@@ -4,6 +4,9 @@ type NestOptions = {
     spawnEgg: (position: Position) => void;
 };
 
+/**
+ * Renders the egg source and reports where a new egg should spawn when clicked.
+ */
 export class Nest {
     private nestContainer: HTMLElement;
 
@@ -28,6 +31,9 @@ export class Nest {
         return this;
     }
 
+    /**
+     * Returns the nest's top-left screen position for distance calculations.
+     */
     getPosition(): Position {
         const { x, y } = this.nestContainer.getBoundingClientRect();
         return { x, y };

@@ -4,6 +4,9 @@ type MouseEventHandler = (event: MouseEvent) => void;
 
 type EggProps = { position: Position; onDrag: MouseEventHandler; onDrop: MouseEventHandler; isDragging?: boolean };
 
+/**
+ * Draggable game object that tracks its on-screen position and drag lifecycle.
+ */
 export class Egg {
     private eggContainer: HTMLDivElement;
     isDragging = false;
@@ -49,6 +52,9 @@ export class Egg {
         return this;
     }
 
+    /**
+     * Moves the egg to a screen position, optionally centering it on the supplied coordinates.
+     */
     updatePosition({ x, y }: Position, offset = true) {
         this.eggContainer.style.left = numberToPx(x - (offset ? this.eggContainer.clientWidth / 2 : 0));
         this.eggContainer.style.top = numberToPx(y - (offset ? this.eggContainer.clientHeight / 2 : 0));
@@ -59,6 +65,9 @@ export class Egg {
         return { x: rect.left, y: rect.top };
     }
 
+    /**
+     * Removes the egg from the DOM
+     */
     delete(): void {
         this.eggContainer.remove();
     }

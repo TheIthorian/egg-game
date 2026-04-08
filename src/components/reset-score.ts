@@ -1,5 +1,8 @@
 import { ScoreService } from '../score-service';
 
+/**
+ * Button wrapper that resets the persisted score when activated.
+ */
 export class ResetScore {
     private container: HTMLDivElement;
 

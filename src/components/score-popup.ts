@@ -3,16 +3,18 @@ const STYLE = {
     containerColor: '#e1e1e1',
 } as const;
 
-/**
- * Renders the static playfield
- */
-export class Background {
+export class ScorePopup {
     protected container: HTMLDivElement;
+    private score: number;
 
-    public insert(parent: HTMLElement) {
+    insert(parent: HTMLElement) {
         this.container = document.createElement('div');
-        this.container.style.width = '100%';
-        this.container.style.height = '100%';
+        this.container.style.width = '500px';
+        this.container.style.height = '100px';
+
+        this.container.style.maxWidth = '100%';
+        this.container.style.maxHeight = '100%';
+
         this.container.style.position = 'absolute';
         this.container.style.left = '0';
         this.container.style.top = '0';
@@ -34,14 +36,8 @@ export class Background {
         </div>
         `;
 
-        this.container.style.zIndex = '-10';
-
         parent.appendChild(this.container);
 
         return this;
-    }
-
-    public getGameContainer(): HTMLElement {
-        return this.container.querySelector('#game-container')!;
     }
 }

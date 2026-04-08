@@ -3,6 +3,9 @@ import { UrlDatabase } from '../database/url-database';
 const GAME_MODES = ['zen', 'story'] as const;
 export type GameMode = (typeof GAME_MODES)[number];
 
+/**
+ * Renders the current game mode and toggles the persisted mode value when clicked.
+ */
 export class GameModeToggle {
     private container: HTMLDivElement;
 
@@ -16,9 +19,8 @@ export class GameModeToggle {
         this.container.innerHTML = `<button>${await this.getButtonDisplayText()}</button>`;
 
         const buttonNode = this.container.childNodes[0];
-        console.log(buttonNode);
+
         buttonNode.addEventListener('click', () => {
-            console.log('toggle game mode');
             this.toggleGameMode();
         });
 
@@ -30,6 +32,9 @@ export class GameModeToggle {
         this.container.querySelector('button').innerText = gameMode.toUpperCase();
     }
 
+    /**
+     * Returns the label shown on the button, defaulting to the fallback mode when none is stored.
+     */
     public async getButtonDisplayText() {
         const gameMode = (await this.getCurrentGameMode()) ?? GameModeToggle.DEFAULT_GAME_MODE;
         return gameMode.toUpperCase();
