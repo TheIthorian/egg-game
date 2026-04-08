@@ -15,7 +15,6 @@ export class Mouth {
         `;
         this.container.style.position = 'absolute';
         this.container.style.padding = '10px';
-        this.container.style.backgroundColor = 'red';
         this.container.style.left = '100px';
         this.container.style.bottom = '150px';
 
