@@ -10,7 +10,6 @@ import { ScoreService } from './score-service';
 
 import {
     ErrorContainer,
-    UrlDatabaseShowcase,
     Egg,
     DataDisplay,
     Background,
@@ -29,7 +28,7 @@ import { GameMode } from 'components/game-mode-toggle';
  */
 export class App {
     private errorContainer: ErrorContainer;
-    private urlDatabaseShowcase: UrlDatabaseShowcase;
+
     private egg: Egg;
     private nest: Nest;
     private mouth: Mouth;
@@ -82,6 +81,7 @@ export class App {
                     onDrop,
                     isDragging: true,
                 });
+
                 await this.database.set('hasEgg', true);
                 await this.database.set('eggPosition', this.egg.getPosition());
             },
