@@ -1,8 +1,8 @@
 import { Position } from '../types';
 
-type MouseEventHandler = (event: MouseEvent) => void;
+type PointerEventHandler = (event: PointerEvent) => void;
 
-type EggProps = { position: Position; onDrag: MouseEventHandler; onDrop: MouseEventHandler; isDragging?: boolean };
+type EggProps = { position: Position; onDrag: PointerEventHandler; onDrop: PointerEventHandler; isDragging?: boolean };
 
 /**
  * Draggable game object that tracks its on-screen position and drag lifecycle.
@@ -10,8 +10,8 @@ type EggProps = { position: Position; onDrag: MouseEventHandler; onDrop: MouseEv
 export class Egg {
     private eggContainer: HTMLDivElement;
     isDragging = false;
-    onDrag: MouseEventHandler;
-    onDrop: MouseEventHandler;
+    onDrag: PointerEventHandler;
+    onDrop: PointerEventHandler;
 
     insert(parent: HTMLElement, { position, onDrag, isDragging, onDrop }: EggProps) {
         this.onDrag = onDrag;
@@ -25,25 +25,29 @@ export class Egg {
         this.eggContainer.style.position = 'absolute';
         this.eggContainer.style.padding = '10px'; // To prevent dropping the egg
         this.eggContainer.style.cursor = 'pointer';
+        this.eggContainer.style.touchAction = 'none';
 
-        this.eggContainer.addEventListener('mousedown', () => {
+        this.eggContainer.addEventListener('pointerdown', event => {
+            this.eggContainer.setPointerCapture(event.pointerId);
             this.isDragging = true;
         });
 
-        document.addEventListener('mousemove', event => {
+        document.addEventListener('pointermove', event => {
             if (!this.isDragging) return;
 
-            this.updatePosition({ x: event.x, y: event.y });
+            this.updatePosition({ x: event.clientX, y: event.clientY });
             onDrag(event);
         });
 
-        this.eggContainer.addEventListener('mouseup', e => {
-            if (this.isDragging) {
-                this.onDrop(e);
-            }
+        const finishDrag = (event: PointerEvent) => {
+            if (!this.isDragging) return;
 
+            this.onDrop(event);
             this.isDragging = false;
-        });
+        };
+
+        document.addEventListener('pointerup', finishDrag);
+        document.addEventListener('pointercancel', finishDrag);
 
         parent.appendChild(this.eggContainer);
 

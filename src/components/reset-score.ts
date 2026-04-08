@@ -3,7 +3,7 @@ import { ScoreService } from '../score-service';
 /**
  * Button wrapper that resets the persisted score when activated.
  */
-export class ResetScore {
+export class ResetScoreButton {
     private container: HTMLDivElement;
 
     constructor(private readonly scoreService: ScoreService) {}

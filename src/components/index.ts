@@ -1,12 +1,13 @@
 export { Background } from './background';
 export { DataDisplay } from './data-display';
 export { Egg } from './egg';
+export { EggPurchasePopup } from './egg-purchase-popup';
 export { ErrorContainer } from './error-container';
 export { Mouth } from './mouth';
 export { Nest } from './nest';
 export { GameModeToggle } from './game-mode-toggle';
 export { UrlDatabaseShowcase } from './url-database-showcase';
-export { ResetScore } from './reset-score';
+export { ResetScoreButton } from './reset-score';
 export { ScoreDisplay } from './score-display';
 export { ScorePopup } from './score-popup';
 export { UIControls } from './ui-controls';

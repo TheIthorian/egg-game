@@ -7,15 +7,17 @@ import { Position } from './types';
 import { createDebouncer } from './debouncer';
 import { registerHotkeys } from './hotkey';
 import { ScoreService } from './score-service';
+import { INITIAL_EGG_COUNT, MAX_SCORE_POPUP_DELTA, MIN_SCORE_POPUP_DELTA } from './constants';
 
 import {
     ErrorContainer,
     Egg,
+    EggPurchasePopup,
     DataDisplay,
     Background,
     Nest,
     Mouth,
-    ResetScore,
+    ResetScoreButton,
     ScoreDisplay,
     ScorePopup,
     GameModeToggle,
@@ -36,6 +38,7 @@ export class App {
     private dataDisplay: DataDisplay;
     private scoreDisplay: ScoreDisplay;
     private scorePopup: ScorePopup;
+    private eggPurchasePopup: EggPurchasePopup;
     private gameModeToggle: GameModeToggle;
 
     constructor(
@@ -60,8 +63,7 @@ export class App {
     public async main() {
         try {
             await this.attachComponents();
-            const data = await this.database.getAll();
-            this.dataPublisher.publish(data);
+            await this.publishInitialState();
         } catch (error) {
             this.handleError(error);
         }
@@ -70,15 +72,17 @@ export class App {
     private async attachComponents() {
         const databaseUpdateDebouncer = createDebouncer();
         const onDrag = () => databaseUpdateDebouncer(() => this.database.set('eggPosition', this.egg.getPosition()));
-        const onDrop = (e: MouseEvent) => this.handleDropEgg(e);
+        const onDrop = (e: PointerEvent) => this.handleDropEgg(e);
 
         this.errorContainer = new ErrorContainer(() => {
             this.database.drop();
             window.location.reload();
         }).insert(this.root);
 
-        this.nest = new Nest({
+        this.nest = new Nest(this.database, {
+            onNoEgg: () => this.eggPurchasePopup.show(INITIAL_EGG_COUNT),
             spawnEgg: async (position: Position) => {
+                // There's already an egg in play
                 if ((await this.database.get('hasEgg')) && this.egg) return;
 
                 this.egg = new Egg().insert(this.root, { position, onDrag, onDrop, isDragging: true });
@@ -94,9 +98,14 @@ export class App {
 
         const uiControls = new UIControls().insert(this.root);
 
-        new ResetScore(this.scoreService).insert(uiControls.getDomElement());
+        new ResetScoreButton(this.scoreService).insert(uiControls.getDomElement());
+
         this.scoreDisplay = new ScoreDisplay().insert(this.root);
-        this.scorePopup = new ScorePopup(60, 240).insert(this.root);
+        this.scorePopup = new ScorePopup(MIN_SCORE_POPUP_DELTA, MAX_SCORE_POPUP_DELTA).insert(this.root);
+
+        this.eggPurchasePopup = new EggPurchasePopup({
+            onPurchaseConfirmed: async eggCount => await this.database.set<number>('eggCount', eggCount),
+        }).insert(this.root);
 
         this.gameModeToggle = await new GameModeToggle(this.database).insert(uiControls.getDomElement());
 
@@ -120,7 +129,9 @@ export class App {
             const previousData = e.detail.previousData;
             const score = <number>data.score ?? 0;
             const previousScore = <number>previousData.score ?? 0;
+            const eggCount = <number>data.eggCount;
 
+            this.nest.setEggCount(eggCount);
             this.dataDisplay.setData(data);
             this.scoreDisplay.setScore(score);
             this.scorePopup.handleScoreChange(previousScore, score);
@@ -128,15 +139,29 @@ export class App {
         }) as EventListener);
     }
 
-    private async handleDropEgg(event: MouseEvent) {
+    private async handleDropEgg(event: PointerEvent) {
         if (!this.mouth.isWithinBounds({ x: event.clientX, y: event.clientY })) return;
 
         const distanceBetween = distance(this.mouth.getPosition(), this.nest.getPosition());
-        await Promise.all([
-            this.scoreService.increaseScoreForEggDrag(distanceBetween),
-            this.database.set('hasEgg', false),
-        ]);
+        const data = await this.database.getAll();
+        const score = <number>data.score ?? 0;
+        const eggsEaten = <number>data.eggsEaten ?? 0;
+
+        await this.database.setAll({
+            ...data,
+            score: score + this.scoreService.getScoreForEggDrag(distanceBetween),
+            hasEgg: false,
+            eggsEaten: eggsEaten + 1,
+        });
+
         this.egg.delete();
+    }
+
+    private async publishInitialState() {
+        const data = await this.database.getAll();
+        const nextData = { ...data, eggCount: data.eggCount ?? INITIAL_EGG_COUNT, eggsEaten: data.eggsEaten ?? 0 };
+        await this.database.setAll(nextData);
+        this.dataPublisher.publish(data);
     }
 
     /**

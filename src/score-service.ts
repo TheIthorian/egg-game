@@ -8,12 +8,8 @@ const SCORE_PER_PIXEL = 0.01;
 export class ScoreService {
     constructor(private readonly database: UrlDatabase) {}
 
-    /**
-     * Converts drag distance into score, accounting for browser zoom so the result feels consistent.
-     */
-    async increaseScoreForEggDrag(distance: number) {
-        const scored = Math.max(Math.floor(distance * this.getZoomFactor() * SCORE_PER_PIXEL), 1);
-        await this.database.update<number>('score', (score = 0) => score + scored);
+    public getScoreForEggDrag(distance: number) {
+        return Math.max(Math.floor(distance * this.getZoomFactor() * SCORE_PER_PIXEL), 1);
     }
 
     async resetScore() {
