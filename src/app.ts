@@ -145,15 +145,17 @@ export class App {
         ) => {
             const data = e.detail.data;
             const previousData = e.detail.previousData;
+            const gameMode = <GameMode>data.gameMode ?? GameModeToggle.DEFAULT_GAME_MODE;
             const score = <number>data.score ?? 0;
             const previousScore = <number>previousData.score ?? 0;
             const eggCount = <number>data.eggCount ?? STARTING_EGG_COUNT;
 
             this.nest.setEggCount(eggCount);
+            this.nest.setEggCountVisible(gameMode === 'story');
             this.dataDisplay.setData(data);
             this.scoreDisplay.setScore(score);
             this.scorePopup.handleScoreChange(previousScore, score);
-            this.gameModeToggle.setMode(<GameMode>data.gameMode);
+            this.gameModeToggle.setMode(gameMode);
         }) as EventListener);
     }
 
@@ -165,11 +167,10 @@ export class App {
         const eggCount = <number>data.eggCount ?? STARTING_EGG_COUNT;
         const score = <number>data.score ?? 0;
         const eggsEaten = <number>data.eggsEaten ?? 0;
+        const gameMode = <GameMode>data.gameMode ?? GameModeToggle.DEFAULT_GAME_MODE;
         const shouldShowEggCountPopupAfterNextFeed = <boolean>data.shouldShowEggCountPopupAfterNextFeed;
 
-        console.log({ shouldShowEggCountPopupAfterNextFeed });
-
-        if (shouldShowEggCountPopupAfterNextFeed) {
+        if (shouldShowEggCountPopupAfterNextFeed && gameMode === 'story') {
             this.eggCountPopup.show(eggCount);
         }
 
@@ -178,7 +179,8 @@ export class App {
             score: score + this.scoreService.getScoreForEggDrag(distanceBetween),
             hasEgg: false,
             eggsEaten: eggsEaten + 1,
-            shouldShowEggCountPopupAfterNextFeed: false,
+            shouldShowEggCountPopupAfterNextFeed:
+                gameMode === 'story' ? false : shouldShowEggCountPopupAfterNextFeed,
         });
 
         this.egg.delete();
@@ -188,6 +190,7 @@ export class App {
         const data = await this.database.getAll();
         const nextData = {
             ...data,
+            gameMode: data.gameMode ?? GameModeToggle.DEFAULT_GAME_MODE,
             eggCount: data.eggCount ?? STARTING_EGG_COUNT,
             eggDeductionFactor: data.eggDeductionFactor ?? DEFAULT_EGG_DEDUCTION_FACTOR,
             eggsEaten: data.eggsEaten ?? 0,

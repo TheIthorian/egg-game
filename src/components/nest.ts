@@ -1,6 +1,7 @@
 import { Position } from 'types';
 import { BASE_EGG_DEDUCTION_AMOUNT, DEFAULT_EGG_DEDUCTION_FACTOR, STARTING_EGG_COUNT } from '../constants';
 import { UrlDatabase } from '../database';
+import { GameMode, GameModeToggle } from './game-mode-toggle';
 
 type NestOptions = {
     spawnEgg: (position: Position) => void;
@@ -35,6 +36,14 @@ export class Nest {
         parent.appendChild(this.nestContainer);
 
         this.nestContainer.addEventListener('pointerdown', async (e: PointerEvent) => {
+            const gameMode =
+                (await this.database.get<GameMode>('gameMode')) ?? GameModeToggle.DEFAULT_GAME_MODE;
+
+            if (gameMode !== 'story') {
+                this.nestOptions.spawnEgg({ x: e.clientX, y: e.clientY });
+                return;
+            }
+
             const eggCount = (await this.database.get<number>('eggCount')) ?? STARTING_EGG_COUNT;
 
             const eggDeductionFactor =
@@ -57,6 +66,10 @@ export class Nest {
 
     public setEggCount(eggCount: number) {
         this.eggCountElement.innerText = `EGGS: ${eggCount}`;
+    }
+
+    public setEggCountVisible(isVisible: boolean) {
+        this.eggCountElement.style.display = isVisible ? 'block' : 'none';
     }
 
     /**

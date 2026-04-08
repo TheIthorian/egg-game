@@ -90,7 +90,7 @@ export class EggPurchasePopup {
 
         const value = this.inputElement.value.trim();
 
-        if (value === 'YES') {
+        if (value.toUpperCase() === 'YES') {
             this.clearError();
             await this.options.onPurchaseConfirmed(this.eggBasketPurchaseCount);
             this.hide();
