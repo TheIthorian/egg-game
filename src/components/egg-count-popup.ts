@@ -4,6 +4,7 @@ export class EggCountPopup {
     protected container: HTMLDivElement;
     private messageElement: HTMLDivElement;
     private showTimeoutId: string;
+    private hideEventListener = () => this.hide();
 
     public insert(parent: HTMLElement) {
         this.container = document.createElement('div');
@@ -42,12 +43,13 @@ export class EggCountPopup {
         this.container.style.display = 'block';
 
         this.showTimeoutId = setTimeout(() =>
-            document.addEventListener('click', () => this.hide())
+            document.addEventListener('click', this.hideEventListener.bind(this))
         ) as unknown as string;
     }
 
     public hide() {
         this.container.style.display = 'none';
         clearTimeout(this.showTimeoutId);
+        document.removeEventListener('click', this.hideEventListener.bind(this));
     }
 }

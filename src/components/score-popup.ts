@@ -1,8 +1,13 @@
 const STYLE = { borderColor: 'black', containerColor: '#ffffff' } as const;
 
+/**
+ * Presents a modal which tells the user (inaccurately) how many eggs they have moved
+ */
 export class ScorePopup {
     protected container: HTMLDivElement;
     private messageElement: HTMLDivElement;
+    private showTimeoutId: string;
+    private hideEventListener = () => this.hideEggCount();
 
     /** The score is not reset so carry over the previous threshold */
     private previousPopupTriggerAmount: number = null;
@@ -25,9 +30,6 @@ export class ScorePopup {
         this.container.style.display = 'none';
         this.container.style.zIndex = '50';
         this.container.style.pointerEvents = 'none';
-
-        // Hide on click
-        document.addEventListener('click', () => this.hideEggCount());
 
         this.container.innerHTML = `
         <div style='width: 100%; background-color: ${STYLE.containerColor}; border: solid 3px ${STYLE.borderColor}; box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.15)'>
@@ -52,6 +54,8 @@ export class ScorePopup {
     public handleScoreChange(previousScore: number, currentScore: number) {
         if (!previousScore || previousScore == currentScore) return;
 
+        console.log({ previousScore, currentScore });
+
         // We may be loading old state so let's restart the counter
         if (!this.previousPopupTriggerAmount || !this.nextScorePopupTriggerAmount) {
             this.previousPopupTriggerAmount = currentScore;
@@ -70,10 +74,15 @@ export class ScorePopup {
     public showEggCount(count: number) {
         this.messageElement.innerText = `${count} eggs`;
         this.container.style.display = 'block';
+        this.showTimeoutId = setTimeout(() =>
+            document.addEventListener('click', this.hideEventListener)
+        ) as unknown as string;
     }
 
     public hideEggCount() {
         this.container.style.display = 'none';
+        clearTimeout(this.showTimeoutId);
+        document.removeEventListener('click', this.hideEventListener);
     }
 
     private getRandomEggCount() {
