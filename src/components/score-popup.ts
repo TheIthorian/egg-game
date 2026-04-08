@@ -1,4 +1,4 @@
-const STYLE = { borderColor: 'black', containerColor: '#d9dde0' } as const;
+const STYLE = { borderColor: 'black', containerColor: '#ffffff' } as const;
 
 export class ScorePopup {
     protected container: HTMLDivElement;
@@ -16,7 +16,7 @@ export class ScorePopup {
         this.container = document.createElement('div');
         this.container.style.position = 'absolute';
 
-        this.container.style.top = '60px';
+        this.container.style.top = '40%';
         this.container.style.left = '50%';
 
         this.container.style.transform = 'translateX(-50%)';
