@@ -8,4 +8,5 @@ export { GameModeToggle } from './game-mode-toggle';
 export { UrlDatabaseShowcase } from './url-database-showcase';
 export { ResetScore } from './reset-score';
 export { ScoreDisplay } from './score-display';
+export { ScorePopup } from './score-popup';
 export { UIControls } from './ui-controls';

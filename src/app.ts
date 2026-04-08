@@ -17,6 +17,7 @@ import {
     Mouth,
     ResetScore,
     ScoreDisplay,
+    ScorePopup,
     GameModeToggle,
     UIControls,
 } from './components';
@@ -34,6 +35,7 @@ export class App {
     private mouth: Mouth;
     private dataDisplay: DataDisplay;
     private scoreDisplay: ScoreDisplay;
+    private scorePopup: ScorePopup;
     private gameModeToggle: GameModeToggle;
 
     constructor(
@@ -58,7 +60,8 @@ export class App {
     public async main() {
         try {
             await this.attachComponents();
-            this.dataPublisher.publish(await this.database.getAll());
+            const data = await this.database.getAll();
+            this.dataPublisher.publish(data);
         } catch (error) {
             this.handleError(error);
         }
@@ -78,12 +81,7 @@ export class App {
             spawnEgg: async (position: Position) => {
                 if ((await this.database.get('hasEgg')) && this.egg) return;
 
-                this.egg = new Egg().insert(this.root, {
-                    position,
-                    onDrag,
-                    onDrop,
-                    isDragging: true,
-                });
+                this.egg = new Egg().insert(this.root, { position, onDrag, onDrop, isDragging: true });
 
                 await this.database.set('hasEgg', true);
                 await this.database.set('eggPosition', this.egg.getPosition());
@@ -98,6 +96,7 @@ export class App {
 
         new ResetScore(this.scoreService).insert(uiControls.getDomElement());
         this.scoreDisplay = new ScoreDisplay().insert(this.root);
+        this.scorePopup = new ScorePopup(60, 240).insert(this.root);
 
         this.gameModeToggle = await new GameModeToggle(this.database).insert(uiControls.getDomElement());
 
@@ -114,10 +113,17 @@ export class App {
             r: () => this.scoreService.resetScore(),
         });
 
-        window.addEventListener('dataChange', ((e: CustomEvent<{ data: Record<string, unknown> }>) => {
-            const data = e.detail.data as Record<string, unknown>;
+        window.addEventListener('dataChange', ((
+            e: CustomEvent<{ data: Record<string, unknown>; previousData: Record<string, unknown> }>
+        ) => {
+            const data = e.detail.data;
+            const previousData = e.detail.previousData;
+            const score = <number>data.score ?? 0;
+            const previousScore = <number>previousData.score ?? 0;
+
             this.dataDisplay.setData(data);
-            this.scoreDisplay.setScore(<number>data.score ?? 0);
+            this.scoreDisplay.setScore(score);
+            this.scorePopup.handleScoreChange(previousScore, score);
             this.gameModeToggle.setMode(<GameMode>data.gameMode);
         }) as EventListener);
     }

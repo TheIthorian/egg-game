@@ -42,10 +42,11 @@ export class UrlDatabase {
     }
 
     public async set<T>(key: string, value: T) {
-        const allData = await this.getAll();
+        const previousData = await this.getAll();
+        const allData = { ...previousData };
         allData[key] = value;
 
-        this.dataPublisher.publish(allData);
+        this.dataPublisher.publish(allData, previousData);
         await this.setDatabaseJsonString(JSON.stringify(allData));
     }
 
@@ -62,7 +63,8 @@ export class UrlDatabase {
      * Replaces the full state object in one write operation.
      */
     public async setAll(value: Record<string, unknown>) {
-        this.dataPublisher.publish(value);
+        const previousData = await this.getAll();
+        this.dataPublisher.publish(value, previousData);
         this.setDatabaseJsonString(JSON.stringify(value));
     }
 

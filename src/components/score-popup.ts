@@ -1,43 +1,89 @@
-const STYLE = {
-    borderColor: 'black',
-    containerColor: '#e1e1e1',
-} as const;
+const STYLE = { borderColor: 'black', containerColor: '#d9dde0' } as const;
 
 export class ScorePopup {
     protected container: HTMLDivElement;
-    private score: number;
+    private messageElement: HTMLDivElement;
 
-    insert(parent: HTMLElement) {
+    /** The score is not reset so carry over the previous threshold */
+    private previousPopupTriggerAmount: number = null;
+
+    /** The score increase needed to trigger the popup */
+    private nextScorePopupTriggerAmount: number = null;
+
+    constructor(private readonly minScorePopupDelta: number, private readonly maxScorePopupDelta: number) {}
+
+    public insert(parent: HTMLElement) {
         this.container = document.createElement('div');
-        this.container.style.width = '500px';
-        this.container.style.height = '100px';
-
-        this.container.style.maxWidth = '100%';
-        this.container.style.maxHeight = '100%';
-
         this.container.style.position = 'absolute';
-        this.container.style.left = '0';
-        this.container.style.top = '0';
-        this.container.style.padding = '40px';
+
+        this.container.style.top = '60px';
+        this.container.style.left = '50%';
+
+        this.container.style.transform = 'translateX(-50%)';
+        this.container.style.width = 'min(560px, calc(100% - 48px))';
+
+        this.container.style.display = 'none';
+        this.container.style.zIndex = '50';
+        this.container.style.pointerEvents = 'none';
+
+        // Hide on click
+        document.addEventListener('click', () => this.hideEggCount());
 
         this.container.innerHTML = `
-        <div style='width: 100%; height: 100%; background-color: ${STYLE.containerColor}; display: flex; flex-direction: column; align-items: center; border-bottom-right-radius: 20px; border-bottom-left-radius: 20px; border: solid 3px ${STYLE.borderColor}'>
-            <div style='width: 100%; background-color: ${STYLE.containerColor}; display: flex; flex-direction: column; justify-content: space-around; height: 30px; padding: 4px; border-bottom: solid 3px ${STYLE.borderColor}'>
+        <div style='width: 100%; background-color: ${STYLE.containerColor}; border: solid 3px ${STYLE.borderColor}; box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.15)'>
+            <div style='width: 100%; background-color: ${STYLE.containerColor}; display: flex; flex-direction: column; justify-content: space-around; height: 28px; padding: 4px; border-bottom: solid 3px ${STYLE.borderColor}'>
                 <div style='width: 100%; padding: 1px; background-color: ${STYLE.borderColor}'></div>
                 <div style='width: 100%; padding: 1px; background-color: ${STYLE.borderColor}'></div>
                 <div style='width: 100%; padding: 1px; background-color: ${STYLE.borderColor}'></div>
                 <div style='width: 100%; padding: 1px; background-color: ${STYLE.borderColor}'></div>
             </div>
-            <div id='game-container' style='padding: 30px; background-color: ${STYLE.containerColor}'>
-                <div style='display: flex; flex-direction: row; align-items: center; justify-items: center; font-family: monospace;'>  
-                    <h2>FEED EGGS</h2>
-                </div>
+            <div id='score-popup-message' style='min-height: 128px; display: flex; align-items: center; justify-content: center; font-size: 40px; letter-spacing: 2px; text-transform: uppercase;'>
             </div>
         </div>
         `;
 
+        this.messageElement = this.container.querySelector('#score-popup-message')!;
+
         parent.appendChild(this.container);
 
         return this;
+    }
+
+    public handleScoreChange(previousScore: number, currentScore: number) {
+        if (!previousScore || previousScore == currentScore) return;
+
+        // We may be loading old state so let's restart the counter
+        if (!this.previousPopupTriggerAmount || !this.nextScorePopupTriggerAmount) {
+            this.previousPopupTriggerAmount = currentScore;
+            this.nextScorePopupTriggerAmount = currentScore + this.getRandomScorePopupDelta();
+            return;
+        }
+
+        // Check if we have gained enough score to trigger the popup
+        if (currentScore >= this.nextScorePopupTriggerAmount) {
+            this.showEggCount(this.getRandomEggCount());
+            this.previousPopupTriggerAmount = this.nextScorePopupTriggerAmount;
+            this.nextScorePopupTriggerAmount = currentScore + this.getRandomScorePopupDelta();
+        }
+    }
+
+    public showEggCount(count: number) {
+        this.messageElement.innerText = `${count} eggs`;
+        this.container.style.display = 'block';
+    }
+
+    public hideEggCount() {
+        this.container.style.display = 'none';
+    }
+
+    private getRandomEggCount() {
+        return Math.floor(Math.random() * 28) + 2;
+    }
+
+    private getRandomScorePopupDelta() {
+        return (
+            Math.floor(Math.random() * (this.maxScorePopupDelta - this.minScorePopupDelta + 1)) +
+            this.minScorePopupDelta
+        );
     }
 }
