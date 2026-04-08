@@ -14,6 +14,7 @@ export class ErrorContainer {
 
         this.errorMessageElement = document.createElement('p');
         this.restartButton = document.createElement('button');
+        this.restartButton.classList.add('hidden');
         this.restartButton.innerText = 'Restart';
         this.restartButton.addEventListener('click', this.onRestart);
 
@@ -26,5 +27,6 @@ export class ErrorContainer {
 
     public setError(error: Error) {
         this.errorMessageElement.innerText = `Error: ${error.message}`;
+        this.restartButton.classList.remove('hidden');
     }
 }
