@@ -9,6 +9,8 @@ This project is a lightweight browser game with a deliberately simple shape. It 
 -   The player creates an egg from the nest.
 -   The egg is dragged across the page toward the goal.
 -   A successful drop awards score.
+-   The nest has a finite egg supply that depletes during play.
+-   When eggs run out, the player is prompted to buy a new pack before continuing.
 -   The run can be reset or switched between modes.
 -   The current session can be revisited because progress is encoded into the URL.
 
@@ -18,6 +20,7 @@ This project is a lightweight browser game with a deliberately simple shape. It 
 -   Small-scale by design: the codebase favors straightforward imperative code over framework machinery.
 -   Shareable sessions: the same mechanism that stores progress also makes a session easy to send or reopen.
 -   State-driven UI: visible game information is derived from persisted state rather than treated as separate truth.
+-   Session continuity includes inventory: score, egg supply, and related gameplay state travel together in the URL.
 
 ## What matters when changing it
 

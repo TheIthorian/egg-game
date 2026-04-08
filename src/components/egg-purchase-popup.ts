@@ -38,7 +38,7 @@ export class EggPurchasePopup {
                 </div>
             </div>
             <div style='padding: 56px 48px 88px; box-sizing: border-box;'>
-                <div id='egg-purchase-popup-message' style='text-align: center; font-size: 40px; line-height: 1.35; letter-spacing: 1px;'>
+                <div id='egg-purchase-popup-message' style='text-align: center; font-size: 32px; line-height: 1.35; letter-spacing: 1px;'>
                     Dude, you ran out of eggs.<br />
                     Would you like to buy<br />
                     an 0 pack of eggs?
@@ -48,7 +48,7 @@ export class EggPurchasePopup {
                     type='text'
                     autocomplete='off'
                     spellcheck='false'
-                    style='display: block; width: min(840px, 100%); max-width: 100%; height: 92px; margin: 92px auto 0; border: solid 4px ${STYLE.borderColor}; box-sizing: border-box; font-size: 36px; text-align: center; text-transform: uppercase; outline: none;'
+                    style='display: block; width: min(832px, 100%); max-width: 100%; height: 92px; margin: 92px auto 0; border: solid 4px ${STYLE.borderColor}; box-sizing: border-box; font-size: 36px; text-align: center; text-transform: uppercase; outline: none;'
                 />
             </div>
         </div>
@@ -58,7 +58,7 @@ export class EggPurchasePopup {
         this.inputElement = this.container.querySelector('#egg-purchase-popup-input')!;
         this.messageElement = this.container.querySelector('#egg-purchase-popup-message')!;
 
-        this.inputElement.addEventListener('input', () => void this.handleInputChange());
+        this.inputElement.addEventListener('keydown', event => void this.handleKeyDown(event));
 
         parent.appendChild(this.container);
 
@@ -84,7 +84,9 @@ export class EggPurchasePopup {
         this.resetInputs();
     }
 
-    private async handleInputChange() {
+    private async handleKeyDown(event: KeyboardEvent) {
+        if (event.key !== 'Enter') return;
+
         const value = this.inputElement.value.trim();
 
         if (value === 'YES') {
@@ -94,7 +96,7 @@ export class EggPurchasePopup {
             return;
         }
 
-        if (value.length === 0 || 'YES'.startsWith(value)) {
+        if (value.length === 0) {
             this.clearError();
             return;
         }

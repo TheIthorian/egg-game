@@ -7,7 +7,14 @@ import { Position } from './types';
 import { createDebouncer } from './debouncer';
 import { registerHotkeys } from './hotkey';
 import { ScoreService } from './score-service';
-import { MAX_SCORE_POPUP_DELTA, MIN_SCORE_POPUP_DELTA, STARTING_EGG_COUNT, STORE_EGG_COUNT } from './constants';
+import {
+    DEFAULT_EGG_DEDUCTION_FACTOR,
+    MAX_SCORE_POPUP_DELTA,
+    MIN_SCORE_POPUP_DELTA,
+    PURCHASED_EGG_DEDUCTION_FACTOR,
+    STARTING_EGG_COUNT,
+    STORE_EGG_COUNT,
+} from './constants';
 
 import {
     ErrorContainer,
@@ -104,7 +111,14 @@ export class App {
         this.scorePopup = new ScorePopup(MIN_SCORE_POPUP_DELTA, MAX_SCORE_POPUP_DELTA).insert(this.root);
 
         this.eggPurchasePopup = new EggPurchasePopup({
-            onPurchaseConfirmed: async eggCount => await this.database.set<number>('eggCount', eggCount),
+            onPurchaseConfirmed: async eggCount => {
+                const data = await this.database.getAll();
+                await this.database.setAll({
+                    ...data,
+                    eggCount,
+                    eggDeductionFactor: PURCHASED_EGG_DEDUCTION_FACTOR,
+                });
+            },
         }).insert(this.root);
 
         this.gameModeToggle = await new GameModeToggle(this.database).insert(uiControls.getDomElement());
@@ -159,7 +173,12 @@ export class App {
 
     private async publishInitialState() {
         const data = await this.database.getAll();
-        const nextData = { ...data, eggCount: data.eggCount ?? STARTING_EGG_COUNT, eggsEaten: data.eggsEaten ?? 0 };
+        const nextData = {
+            ...data,
+            eggCount: data.eggCount ?? STARTING_EGG_COUNT,
+            eggDeductionFactor: data.eggDeductionFactor ?? DEFAULT_EGG_DEDUCTION_FACTOR,
+            eggsEaten: data.eggsEaten ?? 0,
+        };
         await this.database.setAll(nextData);
         this.dataPublisher.publish(data);
     }

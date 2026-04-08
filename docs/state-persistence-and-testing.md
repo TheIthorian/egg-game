@@ -8,9 +8,13 @@ The distinctive part of this project is not the gameplay itself. It is the decis
 
 The application treats state as one portable snapshot rather than a set of unrelated browser-side fragments. That keeps the save model easy to understand: if the URL is preserved, the session is preserved.
 
+That snapshot now includes inventory-style gameplay state as well as presentation-adjacent runtime values. For example, remaining eggs and eggs eaten are part of the same persisted session as score and object position.
+
 ## Publication model
 
 When state changes, the rest of the interface is expected to react from that shared source. The important idea is consistency: visible UI should follow persisted state, not drift away from it.
+
+This matters for gameplay features like egg inventory: the nest display, spawn gating, and purchase flow should all agree with the persisted egg count rather than maintaining competing local truth.
 
 ## URL persistence implications
 
@@ -34,3 +38,4 @@ Testing is most valuable around the parts of the system that are easiest to brea
 -   Favor tests that protect session portability and state continuity.
 -   Treat persistence changes as compatibility-sensitive work.
 -   Add broader integration coverage only where multiple parts of the app have to cooperate to preserve gameplay behavior.
+-   When adding new persisted gameplay fields, prefer tests that verify both the write behavior and the UI reactions that depend on those fields.

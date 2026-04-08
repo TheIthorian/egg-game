@@ -1,5 +1,5 @@
 import { Position } from 'types';
-import { STARTING_EGG_COUNT } from '../constants';
+import { BASE_EGG_DEDUCTION_AMOUNT, DEFAULT_EGG_DEDUCTION_FACTOR, STARTING_EGG_COUNT } from '../constants';
 import { UrlDatabase } from '../database';
 
 type NestOptions = {
@@ -37,12 +37,17 @@ export class Nest {
         this.nestContainer.addEventListener('pointerdown', async (e: PointerEvent) => {
             const eggCount = (await this.database.get<number>('eggCount')) ?? STARTING_EGG_COUNT;
 
+            const eggDeductionFactor =
+                (await this.database.get<number>('eggDeductionFactor')) ?? DEFAULT_EGG_DEDUCTION_FACTOR;
+
             if (eggCount <= 0) {
                 this.nestOptions.onNoEgg();
                 return;
             }
 
-            const newEggCount = eggCount - 1;
+            const eggDeductionAmount = BASE_EGG_DEDUCTION_AMOUNT * eggDeductionFactor;
+            const newEggCount = Math.max(eggCount - eggDeductionAmount, 0);
+
             await this.database.set('eggCount', newEggCount);
             this.nestOptions.spawnEgg({ x: e.clientX, y: e.clientY });
         });

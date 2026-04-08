@@ -14,7 +14,7 @@ describe('EggPurchasePopup', () => {
 
         const input = document.body.querySelector('#egg-purchase-popup-input') as HTMLInputElement;
         input.value = 'YES';
-        input.dispatchEvent(new Event('input'));
+        input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
 
         await Promise.resolve();
 
@@ -32,7 +32,7 @@ describe('EggPurchasePopup', () => {
         const panel = document.body.querySelector('#egg-purchase-popup-panel') as HTMLDivElement;
 
         input.value = 'NO';
-        input.dispatchEvent(new Event('input'));
+        input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
 
         expect(panel.style.borderColor).toBe('#c62828');
     });
